@@ -38,7 +38,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()  // Public Endpoints
 //                        Restaurants Endpoints
                         .requestMatchers(HttpMethod.GET, "/api/restaurant/**").hasAnyAuthority("ADMIN", "CUSTOMER", "RESTAURANT_OWNER")
-                        .requestMatchers(HttpMethod.POST, "/api/restaurant/**").hasAnyAuthority("ADMIN", "RESTAURANT_OWNER")
+                        .requestMatchers(HttpMethod.POST, "/api/restaurant").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/restaurant/{restaurantId}/menu").hasAuthority("RESTAURANT_OWNER")
 //                        Cart Endpoints
                         .requestMatchers("/api/cart/**").hasAuthority("CUSTOMER")
 //                        Order Endpoint

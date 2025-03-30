@@ -5,6 +5,7 @@ import com.foodorderingsystem.FoodOrderingApplication.dto.RestaurantDTO;
 import com.foodorderingsystem.FoodOrderingApplication.entity.MenuItem;
 import com.foodorderingsystem.FoodOrderingApplication.entity.Restaurant;
 import com.foodorderingsystem.FoodOrderingApplication.service.RestaurantService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class RestaurantController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Restaurant addRestaurant(@RequestBody RestaurantDTO dto) {
         return restaurantService.addRestaurant(dto);
     }
@@ -30,6 +32,7 @@ public class RestaurantController {
     }
 
     @PostMapping("/{restaurantId}/menu")
+    @PreAuthorize("hasRole('RESTAURANT_OWNER')")
     public MenuItem addMenuItem(@PathVariable Long restaurantId, @RequestBody MenuItemDTO dto) {
         return restaurantService.addMenuItem(restaurantId, dto);
     }
