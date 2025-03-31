@@ -4,8 +4,9 @@ import com.foodorderingsystem.FoodOrderingApplication.dto.MenuItemDTO;
 import com.foodorderingsystem.FoodOrderingApplication.dto.RestaurantDTO;
 import com.foodorderingsystem.FoodOrderingApplication.entity.MenuItem;
 import com.foodorderingsystem.FoodOrderingApplication.entity.Restaurant;
+import com.foodorderingsystem.FoodOrderingApplication.service.MenuItemService;
 import com.foodorderingsystem.FoodOrderingApplication.service.RestaurantService;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,14 +16,16 @@ import java.util.List;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
+    private final MenuItemService menuItemService;
 
-    public RestaurantController(RestaurantService restaurantService) {
+    public RestaurantController(RestaurantService restaurantService, MenuItemService menuItemService) {
         this.restaurantService = restaurantService;
+        this.menuItemService = menuItemService;
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public Restaurant addRestaurant(@RequestBody RestaurantDTO dto) {
+        System.out.println(SecurityContextHolder.getContext());
         return restaurantService.addRestaurant(dto);
     }
 
@@ -32,14 +35,13 @@ public class RestaurantController {
     }
 
     @PostMapping("/{restaurantId}/menu")
-    @PreAuthorize("hasRole('RESTAURANT_OWNER')")
     public MenuItem addMenuItem(@PathVariable Long restaurantId, @RequestBody MenuItemDTO dto) {
-        return restaurantService.addMenuItem(restaurantId, dto);
+        return menuItemService.addMenuItem(restaurantId, dto);
     }
 
     @GetMapping("/{restaurantId}/menu")
     public List<MenuItem> getMenuItems(@PathVariable Long restaurantId) {
-        return restaurantService.getMenuItems(restaurantId);
+        return menuItemService.getMenuItems(restaurantId);
     }
 }
 

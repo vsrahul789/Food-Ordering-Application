@@ -24,6 +24,10 @@ public class Restaurant {
     @Column(nullable = false)
     private String address;
 
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User restaurantOwner;
+
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<MenuItem> menuItems;

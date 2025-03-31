@@ -11,7 +11,4 @@ import java.util.List;
 public interface RestaurantService {
     Restaurant addRestaurant(RestaurantDTO dto);
     List<Restaurant> getAllRestaurants();
-
-    MenuItem addMenuItem(Long restaurantId, MenuItemDTO dto);
-    List<MenuItem> getMenuItems(Long restaurantId);
 }
