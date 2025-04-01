@@ -4,6 +4,7 @@ import com.foodorderingsystem.FoodOrderingApplication.dto.AddToCartDTO;
 import com.foodorderingsystem.FoodOrderingApplication.entity.*;
 import com.foodorderingsystem.FoodOrderingApplication.repository.*;
 import com.foodorderingsystem.FoodOrderingApplication.service.CartService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,8 +24,23 @@ public class CartServiceImpl implements CartService {
         this.userRepository = userRepository;
     }
 
+    private User getAuthenticatedUser() {
+        System.out.println(SecurityContextHolder.getContext());
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return (User) principal;
+        } else {
+            throw new IllegalStateException("User is not authenticated");
+        }
+    }
+
     @Override
     public Cart addToCart(Long userId, AddToCartDTO dto) {
+        User user = getAuthenticatedUser();
+        if (!user.getId().equals(userId)) {
+            throw new RuntimeException("You can only add items to your own cart!");
+        }
+
         Cart cart = cartRepository.findByUserId(userId).orElseGet(() -> {
             Cart newCart = new Cart();
             newCart.setUser(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
@@ -47,12 +63,20 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart viewCart(Long userId) {
+        User user = getAuthenticatedUser();
+        if (!user.getId().equals(userId)) {
+            throw new RuntimeException("You can only view your own cart!");
+        }
         return cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
     }
 
     @Override
     public Cart removeFromCart(Long userId, Long cartItemId) {
+        User user = getAuthenticatedUser();
+        if (!user.getId().equals(userId)) {
+            throw new RuntimeException("You can only remove items from your own cart!");
+        }
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
@@ -63,6 +87,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void clearCart(Long userId) {
+        User user = getAuthenticatedUser();
+        if (!user.getId().equals(userId)) {
+            throw new RuntimeException("You can only clear your own cart!");
+        }
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
