@@ -3,6 +3,7 @@ package com.foodorderingsystem.FoodOrderingApplication.service.impl;
 import com.foodorderingsystem.FoodOrderingApplication.entity.*;
 import com.foodorderingsystem.FoodOrderingApplication.repository.*;
 import com.foodorderingsystem.FoodOrderingApplication.service.OrderService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,8 +20,21 @@ public class OrderServiceImpl implements OrderService {
         this.orderRepository = orderRepository;
     }
 
+    private User getAuthenticatedUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return (User) principal;
+        } else {
+            throw new RuntimeException("User not authenticated");
+        }
+    }
+
     @Override
     public Order placeOrder(Long userId) {
+        User user = getAuthenticatedUser();
+        if (!user.getId().equals(userId)) {
+            throw new RuntimeException("You can only place orders for your own account!");
+        }
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
@@ -53,6 +67,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrders(Long userId) {
+        User user = getAuthenticatedUser();
+        if (!user.getId().equals(userId)) {
+            throw new RuntimeException("You can only view your own orders!");
+        }
         return orderRepository.findByUserId(userId);
     }
 

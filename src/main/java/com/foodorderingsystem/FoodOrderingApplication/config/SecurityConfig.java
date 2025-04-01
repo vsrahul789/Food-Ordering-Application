@@ -43,7 +43,10 @@ public class SecurityConfig {
 //                        Cart Endpoints
                         .requestMatchers("/api/cart/**").hasAuthority("CUSTOMER")
 //                        Order Endpoint
-                        .requestMatchers("/api/order/**").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.PUT, "/api/order/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/order/**").hasAuthority("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST,"/api/order/**").hasAuthority("CUSTOMER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/order/**").hasAuthority("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -13,13 +13,11 @@ import java.util.ArrayList;
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
     private final MenuItemRepository menuItemRepository;
     private final UserRepository userRepository;
 
     public CartServiceImpl(CartRepository cartRepository, CartItemRepository cartItemRepository, MenuItemRepository menuItemRepository, UserRepository userRepository) {
         this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
         this.menuItemRepository = menuItemRepository;
         this.userRepository = userRepository;
     }

@@ -16,7 +16,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @PostMapping("/{userId}/place")
+    @PostMapping("/{userId}")
     public Order placeOrder(@PathVariable Long userId) {
         return orderService.placeOrder(userId);
     }
@@ -26,7 +26,7 @@ public class OrderController {
         return orderService.getOrders(userId);
     }
 
-    @PutMapping("/{orderId}/status")
+    @PutMapping("/{orderId}")
     public Order updateOrderStatus(@PathVariable Long orderId, @RequestParam String status) {
         return orderService.updateOrderStatus(orderId, status);
     }
