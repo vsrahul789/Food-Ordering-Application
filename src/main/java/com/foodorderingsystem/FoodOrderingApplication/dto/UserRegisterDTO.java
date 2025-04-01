@@ -1,7 +1,7 @@
 package com.foodorderingsystem.FoodOrderingApplication.dto;
 
 
-import com.foodorderingsystem.FoodOrderingApplication.entity.UserRole;
+import com.foodorderingsystem.FoodOrderingApplication.entity.enums.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 

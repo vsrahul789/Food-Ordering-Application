@@ -1,5 +1,6 @@
 package com.foodorderingsystem.FoodOrderingApplication.entity;
 
+import com.foodorderingsystem.FoodOrderingApplication.entity.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

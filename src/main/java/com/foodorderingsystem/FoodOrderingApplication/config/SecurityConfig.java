@@ -47,6 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/order/**").hasAuthority("CUSTOMER")
                         .requestMatchers(HttpMethod.POST,"/api/order/**").hasAuthority("CUSTOMER")
                         .requestMatchers(HttpMethod.DELETE, "/api/order/**").hasAuthority("CUSTOMER")
+//                        Payment Endpoint
+                        .requestMatchers("/api/payment/**").hasAuthority("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

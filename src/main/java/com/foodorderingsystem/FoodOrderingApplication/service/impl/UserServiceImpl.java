@@ -3,7 +3,7 @@ package com.foodorderingsystem.FoodOrderingApplication.service.impl;
 import com.foodorderingsystem.FoodOrderingApplication.dto.AuthRequestDTO;
 import com.foodorderingsystem.FoodOrderingApplication.dto.UserRegisterDTO;
 import com.foodorderingsystem.FoodOrderingApplication.entity.User;
-import com.foodorderingsystem.FoodOrderingApplication.entity.UserRole;
+import com.foodorderingsystem.FoodOrderingApplication.entity.enums.UserRole;
 import com.foodorderingsystem.FoodOrderingApplication.repository.UserRepository;
 import com.foodorderingsystem.FoodOrderingApplication.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;

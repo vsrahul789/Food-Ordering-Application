@@ -2,10 +2,12 @@ package com.foodorderingsystem.FoodOrderingApplication.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.foodorderingsystem.FoodOrderingApplication.entity.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -28,6 +30,10 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status = OrderStatus.PENDING;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Payment payment;
 
     private double totalAmount;
 }

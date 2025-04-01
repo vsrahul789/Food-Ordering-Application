@@ -1,4 +1,4 @@
-package com.foodorderingsystem.FoodOrderingApplication.entity;
+package com.foodorderingsystem.FoodOrderingApplication.entity.enums;
 
 public enum OrderStatus {
     PENDING,
