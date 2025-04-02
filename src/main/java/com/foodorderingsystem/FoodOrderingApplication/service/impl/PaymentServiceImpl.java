@@ -5,10 +5,10 @@ import com.foodorderingsystem.FoodOrderingApplication.entity.Payment;
 import com.foodorderingsystem.FoodOrderingApplication.entity.enums.PaymentStatus;
 import com.foodorderingsystem.FoodOrderingApplication.repository.PaymentRepository;
 import com.foodorderingsystem.FoodOrderingApplication.service.PaymentService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,7 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Payment getPaymentStatus(Long orderId) {
+    public Optional<Payment> getPaymentStatus(Long orderId) {
         return paymentRepository.findByOrderId(orderId);
     }
 }

@@ -4,8 +4,10 @@ import com.foodorderingsystem.FoodOrderingApplication.dto.AuthRequestDTO;
 import com.foodorderingsystem.FoodOrderingApplication.dto.AuthResponseDTO;
 import com.foodorderingsystem.FoodOrderingApplication.dto.UserRegisterDTO;
 import com.foodorderingsystem.FoodOrderingApplication.entity.User;
-import com.foodorderingsystem.FoodOrderingApplication.security.JwtProvider;
 import com.foodorderingsystem.FoodOrderingApplication.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,28 +15,33 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final JwtProvider jwtProvider;
 
-    public UserController(UserService userService, JwtProvider jwtProvider) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.jwtProvider = jwtProvider;
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody UserRegisterDTO dto) {
+    public ResponseEntity<String> register(@RequestBody UserRegisterDTO dto) {
         userService.registerUser(dto);
-        return "User registered successfully";
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
     @PostMapping("/login")
-    public AuthResponseDTO login(@RequestBody AuthRequestDTO dto) {
-        User user = userService.loginUser(dto);
-        String token = jwtProvider.generateToken(user);
-        return new AuthResponseDTO(token);
+    public ResponseEntity<?> login(@RequestBody AuthRequestDTO dto) {
+        try {
+            AuthResponseDTO response = userService.loginUser(dto);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
     }
 
-    @GetMapping("/testauth")
-    public String testAuth(){
-        return "Authenticated";
+    @GetMapping("/test-auth")
+    public ResponseEntity<String> testAuth() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User user) {
+            return ResponseEntity.ok("Authenticated as: " + user.getEmail());
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
     }
 }

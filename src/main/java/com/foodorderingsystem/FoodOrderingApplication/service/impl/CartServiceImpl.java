@@ -2,14 +2,23 @@ package com.foodorderingsystem.FoodOrderingApplication.service.impl;
 
 import com.foodorderingsystem.FoodOrderingApplication.dto.AddToCartDTO;
 import com.foodorderingsystem.FoodOrderingApplication.entity.*;
+import com.foodorderingsystem.FoodOrderingApplication.exception.ResourceNotFoundException;
+import com.foodorderingsystem.FoodOrderingApplication.exception.UserNotFoundException;
 import com.foodorderingsystem.FoodOrderingApplication.repository.*;
 import com.foodorderingsystem.FoodOrderingApplication.service.CartService;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import com.foodorderingsystem.FoodOrderingApplication.exception.UnauthorizedAccessException;
 
 import java.util.ArrayList;
 
 @Service
+@Transactional
+@Slf4j
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
@@ -23,31 +32,32 @@ public class CartServiceImpl implements CartService {
     }
 
     private User getAuthenticatedUser() {
-        System.out.println(SecurityContextHolder.getContext());
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedAccessException("User is not authenticated");
+        }
+
+        Object principal = authentication.getPrincipal();
+        log.error("Principal: {}", principal.getClass().getName());
         if (principal instanceof User) {
-            return (User) principal;
+            String email = ((User) principal).getEmail();
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UserNotFoundException("User not found"));
         } else {
-            throw new IllegalStateException("User is not authenticated");
+            throw new UnauthorizedAccessException("Invalid authentication principal");
         }
     }
 
     @Override
     public Cart addToCart(Long userId, AddToCartDTO dto) {
         User user = getAuthenticatedUser();
-        if (!user.getId().equals(userId)) {
-            throw new RuntimeException("You can only add items to your own cart!");
-        }
+        validateUserAccess(user, userId);
 
-        Cart cart = cartRepository.findByUserId(userId).orElseGet(() -> {
-            Cart newCart = new Cart();
-            newCart.setUser(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
-            newCart.setItems(new ArrayList<>());
-            return newCart;
-        });
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseGet(() -> createNewCart(user));
 
         MenuItem menuItem = menuItemRepository.findById(dto.getMenuItemId())
-                .orElseThrow(() -> new RuntimeException("Menu Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Menu Item not found"));
 
         CartItem item = new CartItem();
         item.setCart(cart);
@@ -55,44 +65,59 @@ public class CartServiceImpl implements CartService {
         item.setQuantity(dto.getQuantity());
 
         cart.getItems().add(item);
+        log.info("User {} added {} items {} to cart", user.getName(), dto.getQuantity(), menuItem.getName());
         cartRepository.save(cart);
         return cart;
+    }
+
+    private Cart createNewCart(User user) {
+        Cart newCart = new Cart();
+        newCart.setUser(user);
+        newCart.setItems(new ArrayList<>());
+        return newCart;
     }
 
     @Override
     public Cart viewCart(Long userId) {
         User user = getAuthenticatedUser();
-        if (!user.getId().equals(userId)) {
-            throw new RuntimeException("You can only view your own cart!");
-        }
+        validateUserAccess(user, userId);
         return cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
     }
+
+    private void validateUserAccess(User user, Long userId) {
+        if (!user.getId().equals(userId)) {
+            throw new UnauthorizedAccessException("You can only modify your own cart!");
+        }
+    }
+
 
     @Override
     public Cart removeFromCart(Long userId, Long cartItemId) {
         User user = getAuthenticatedUser();
-        if (!user.getId().equals(userId)) {
-            throw new RuntimeException("You can only remove items from your own cart!");
-        }
+        validateUserAccess(user, userId);
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
-        cart.getItems().removeIf(item -> item.getId().equals(cartItemId));
-        cartRepository.save(cart);
-        return cart;
+        boolean removed = cart.getItems().removeIf(item -> item.getId().equals(cartItemId));
+
+        if (!removed) {
+            throw new ResourceNotFoundException("Cart item not found");
+        }
+        log.info("User {} removed item {} from cart", user.getName(), cartItemId);
+        return cartRepository.save(cart);
     }
 
     @Override
     public void clearCart(Long userId) {
         User user = getAuthenticatedUser();
-        if (!user.getId().equals(userId)) {
-            throw new RuntimeException("You can only clear your own cart!");
-        }
+        validateUserAccess(user, userId);
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         cart.getItems().clear();
         cartRepository.save(cart);
+
+        log.info("User {} cleared their cart", user.getName());
     }
 }

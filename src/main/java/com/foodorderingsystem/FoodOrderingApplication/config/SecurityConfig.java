@@ -34,7 +34,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/auth/testauth").hasAnyAuthority("ADMIN", "RESTAURANT_OWNER")
+//                        .requestMatchers("/api/auth/test-auth").hasAnyAuthority("ADMIN", "RESTAURANT_OWNER")
                         .requestMatchers("/api/auth/**").permitAll()  // Public Endpoints
 //                        Restaurants Endpoints
                         .requestMatchers(HttpMethod.GET, "/api/restaurant/**").hasAnyAuthority("ADMIN", "CUSTOMER", "RESTAURANT_OWNER")

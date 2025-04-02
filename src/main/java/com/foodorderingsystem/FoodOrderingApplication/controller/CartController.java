@@ -2,7 +2,10 @@ package com.foodorderingsystem.FoodOrderingApplication.controller;
 
 import com.foodorderingsystem.FoodOrderingApplication.dto.AddToCartDTO;
 import com.foodorderingsystem.FoodOrderingApplication.entity.Cart;
+import com.foodorderingsystem.FoodOrderingApplication.entity.User;
 import com.foodorderingsystem.FoodOrderingApplication.service.CartService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,24 +18,40 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @PostMapping("/{userId}/add")
-    public Cart addToCart(@PathVariable Long userId, @RequestBody AddToCartDTO dto) {
-        return cartService.addToCart(userId, dto);
+    private User getAuthenticatedUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return (User) principal;
+        } else {
+            throw new RuntimeException("User not authenticated");
+        }
     }
 
-    @GetMapping("/{userId}")
-    public Cart viewCart(@PathVariable Long userId) {
-        return cartService.viewCart(userId);
+    @PostMapping("/add")
+    public ResponseEntity<Cart> addToCart(@RequestBody AddToCartDTO dto) {
+        User user = getAuthenticatedUser();
+        Cart cart = cartService.addToCart(user.getId(), dto);
+        return ResponseEntity.ok(cart);
     }
 
-    @DeleteMapping("/{userId}/remove/{cartItemId}")
-    public Cart removeFromCart(@PathVariable Long userId, @PathVariable Long cartItemId) {
-        return cartService.removeFromCart(userId, cartItemId);
+    @GetMapping
+    public ResponseEntity<Cart> viewCart() {
+        User user = getAuthenticatedUser();
+        Cart cart = cartService.viewCart(user.getId());
+        return ResponseEntity.ok(cart);
     }
 
-    @DeleteMapping("/{userId}/clear")
-    public String clearCart(@PathVariable Long userId) {
-        cartService.clearCart(userId);
-        return "Cart cleared successfully";
+    @DeleteMapping("/remove/{cartItemId}")
+    public ResponseEntity<Cart> removeFromCart(@PathVariable Long cartItemId) {
+        User user = getAuthenticatedUser();
+        Cart cart = cartService.removeFromCart(user.getId(), cartItemId);
+        return ResponseEntity.ok(cart);
+    }
+
+    @DeleteMapping("/clear")
+    public ResponseEntity<String> clearCart() {
+        User user = getAuthenticatedUser();
+        cartService.clearCart(user.getId());
+        return ResponseEntity.ok("Cart cleared successfully");
     }
 }

@@ -1,20 +1,22 @@
 package com.foodorderingsystem.FoodOrderingApplication.service.impl;
 
 
-import com.foodorderingsystem.FoodOrderingApplication.dto.MenuItemDTO;
 import com.foodorderingsystem.FoodOrderingApplication.dto.RestaurantDTO;
-import com.foodorderingsystem.FoodOrderingApplication.entity.MenuItem;
 import com.foodorderingsystem.FoodOrderingApplication.entity.Restaurant;
 import com.foodorderingsystem.FoodOrderingApplication.entity.User;
-import com.foodorderingsystem.FoodOrderingApplication.repository.MenuItemRepository;
+import com.foodorderingsystem.FoodOrderingApplication.exception.ResourceNotFoundException;
 import com.foodorderingsystem.FoodOrderingApplication.repository.RestaurantRepository;
 import com.foodorderingsystem.FoodOrderingApplication.repository.UserRepository;
 import com.foodorderingsystem.FoodOrderingApplication.service.RestaurantService;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Transactional
+@Slf4j
 public class RestaurantServiceImpl implements RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
@@ -27,20 +29,21 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public Restaurant addRestaurant(RestaurantDTO dto) {
-        int ownerId = dto.getOwnerId().intValue();
-        if (userRepository.findById((long) ownerId).isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-        User owner = userRepository.findById((long) ownerId).get();
+        User owner = userRepository.findById(dto.getOwnerId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         Restaurant restaurant = new Restaurant();
         restaurant.setName(dto.getName());
         restaurant.setRestaurantOwner(owner);
         restaurant.setAddress(dto.getAddress());
+        log.info("New restaurant '{}' is added", dto.getName());
         return restaurantRepository.save(restaurant);
     }
 
     @Override
     public List<Restaurant> getAllRestaurants() {
-        return restaurantRepository.findAll();
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        log.info("Fetched {} restaurants", restaurants.size());
+        return restaurants;
     }
 }

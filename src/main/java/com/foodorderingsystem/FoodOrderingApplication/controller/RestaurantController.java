@@ -4,8 +4,11 @@ import com.foodorderingsystem.FoodOrderingApplication.dto.MenuItemDTO;
 import com.foodorderingsystem.FoodOrderingApplication.dto.RestaurantDTO;
 import com.foodorderingsystem.FoodOrderingApplication.entity.MenuItem;
 import com.foodorderingsystem.FoodOrderingApplication.entity.Restaurant;
+import com.foodorderingsystem.FoodOrderingApplication.entity.User;
 import com.foodorderingsystem.FoodOrderingApplication.service.MenuItemService;
 import com.foodorderingsystem.FoodOrderingApplication.service.RestaurantService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,25 +26,35 @@ public class RestaurantController {
         this.menuItemService = menuItemService;
     }
 
+    private User getAuthenticatedUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return (User) principal;
+        } else {
+            throw new RuntimeException("User not authenticated");
+        }
+    }
+
     @PostMapping
-    public Restaurant addRestaurant(@RequestBody RestaurantDTO dto) {
-        System.out.println(SecurityContextHolder.getContext());
-        return restaurantService.addRestaurant(dto);
+    public ResponseEntity<?> addRestaurant(@RequestBody RestaurantDTO dto) {
+        Restaurant restaurant = restaurantService.addRestaurant(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(restaurant);
     }
 
     @GetMapping
-    public List<Restaurant> getAllRestaurants() {
-        return restaurantService.getAllRestaurants();
+    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
+        return ResponseEntity.ok(restaurantService.getAllRestaurants());
     }
 
     @PostMapping("/{restaurantId}/menu")
-    public MenuItem addMenuItem(@PathVariable Long restaurantId, @RequestBody MenuItemDTO dto) {
-        return menuItemService.addMenuItem(restaurantId, dto);
+    public ResponseEntity<?> addMenuItem(@PathVariable Long restaurantId, @RequestBody MenuItemDTO dto) {
+        MenuItem menuItem = menuItemService.addMenuItem(restaurantId, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(menuItem);
     }
 
     @GetMapping("/{restaurantId}/menu")
-    public List<MenuItem> getMenuItems(@PathVariable Long restaurantId) {
-        return menuItemService.getMenuItems(restaurantId);
+    public ResponseEntity<List<MenuItem>> getMenuItems(@PathVariable Long restaurantId) {
+        return ResponseEntity.ok(menuItemService.getMenuItems(restaurantId));
     }
 }
 

@@ -40,8 +40,12 @@ public class JwtProvider {
         try {
             parseToken(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            throw new JwtException("Token expired");
+        } catch (MalformedJwtException e) {
+            throw new JwtException("Invalid token format");
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            throw new JwtException("Token validation failed");
         }
     }
 
