@@ -63,7 +63,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public List<Feedback> getFeedbacksByUser() {
+    public List<Feedback> getFeedbacksByUsers() {
         User user = getAuthenticatedUser();
         log.info("Fetching feedbacks for user: {}", user.getEmail());
         return feedbackRepository.findAll();

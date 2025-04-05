@@ -27,6 +27,6 @@ public class FeedbackController {
 
     @GetMapping
     public ResponseEntity<List<Feedback>> getFeedbacks() {
-        return ResponseEntity.ok(feedbackService.getFeedbacksByUser());
+        return ResponseEntity.ok(feedbackService.getFeedbacksByUsers());
     }
 }

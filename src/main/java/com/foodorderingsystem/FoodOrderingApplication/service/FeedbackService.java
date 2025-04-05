@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface FeedbackService {
     Feedback leaveFeedback(FeedbackDTO dto);
-    List<Feedback> getFeedbacksByUser();
+    List<Feedback> getFeedbacksByUsers();
 }
 
