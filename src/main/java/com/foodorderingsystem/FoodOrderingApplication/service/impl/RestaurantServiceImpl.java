@@ -42,8 +42,19 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public List<Restaurant> getAllRestaurants() {
+        log.debug("Fetching all restaurants");
         List<Restaurant> restaurants = restaurantRepository.findAll();
         log.info("Fetched {} restaurants", restaurants.size());
         return restaurants;
+    }
+
+    @Override
+    public void deleteRestaurant(Long restaurantId) {
+        log.debug("Attempting to delete restaurant with ID: {}", restaurantId);
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+
+        restaurantRepository.deleteById(restaurantId);
+        log.info("Restaurant '{}' is deleted", restaurant.getName());
     }
 }

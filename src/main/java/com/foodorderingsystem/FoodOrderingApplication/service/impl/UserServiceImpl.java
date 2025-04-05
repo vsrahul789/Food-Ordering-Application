@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User registerUser(UserRegisterDTO dto) {
+        log.debug("Attempting to register user with email: {}", dto.getEmail());
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             log.warn("Registration attempt failed: Email {} already exists", dto.getEmail());
             throw new UserAlreadyExistsException("Email already in use.");
@@ -44,12 +45,13 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(dto.getRole() == null ? UserRole.CUSTOMER : dto.getRole());
         User savedUser = userRepository.save(user);
-        log.info("User registered successfully: {}", savedUser.getEmail());
+        log.info("User registered successfully with email: {} and role: {}", savedUser.getEmail(), savedUser.getRole());
         return savedUser;
     }
 
     @Override
     public AuthResponseDTO loginUser(AuthRequestDTO dto) {
+        log.debug("Login attempt for email: {}", dto.getEmail());
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
@@ -59,7 +61,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String token = jwtProvider.generateToken(user);
-        log.info("User logged in: {}", user.getEmail());
+        log.info("User logged in successfully: {}", user.getName());
         return new AuthResponseDTO(token);
 
     }

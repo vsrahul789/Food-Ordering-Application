@@ -19,11 +19,10 @@ import java.util.List;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
-    private final MenuItemService menuItemService;
 
-    public RestaurantController(RestaurantService restaurantService, MenuItemService menuItemService) {
+
+    public RestaurantController(RestaurantService restaurantService) {
         this.restaurantService = restaurantService;
-        this.menuItemService = menuItemService;
     }
 
     private User getAuthenticatedUser() {
@@ -46,15 +45,12 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurantService.getAllRestaurants());
     }
 
-    @PostMapping("/{restaurantId}/menu")
-    public ResponseEntity<?> addMenuItem(@PathVariable Long restaurantId, @RequestBody MenuItemDTO dto) {
-        MenuItem menuItem = menuItemService.addMenuItem(restaurantId, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(menuItem);
+    @DeleteMapping("/{restaurantId}")
+    public ResponseEntity<?> deleteRestaurant(@PathVariable Long restaurantId) {
+        restaurantService.deleteRestaurant(restaurantId);
+        return ResponseEntity.ok("Restaurant deleted successfully");
     }
 
-    @GetMapping("/{restaurantId}/menu")
-    public ResponseEntity<List<MenuItem>> getMenuItems(@PathVariable Long restaurantId) {
-        return ResponseEntity.ok(menuItemService.getMenuItems(restaurantId));
-    }
+
 }
 

@@ -11,4 +11,5 @@ import java.util.List;
 public interface RestaurantService {
     Restaurant addRestaurant(RestaurantDTO dto);
     List<Restaurant> getAllRestaurants();
+    void deleteRestaurant(Long restaurantId);
 }

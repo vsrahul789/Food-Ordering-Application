@@ -27,7 +27,7 @@ public class CartController {
         }
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<Cart> addToCart(@RequestBody AddToCartDTO dto) {
         User user = getAuthenticatedUser();
         Cart cart = cartService.addToCart(user.getId(), dto);
@@ -48,7 +48,7 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
-    @DeleteMapping("/clear")
+    @DeleteMapping
     public ResponseEntity<String> clearCart() {
         User user = getAuthenticatedUser();
         cartService.clearCart(user.getId());

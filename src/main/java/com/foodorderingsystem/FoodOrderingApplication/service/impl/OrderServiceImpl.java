@@ -102,6 +102,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void cancelOrder(Long orderId, String status) {
+        User user = getAuthenticatedUser();
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            throw new BadRequestException("Order is already delivered");
+        }
+        order.setStatus(OrderStatus.valueOf(status));
+        log.info("User {} cancelled order {}", user.getName(), orderId);
+        orderRepository.save(order);
+    }
+
+    @Override
     public Order updateOrderStatus(Long orderId, String status) {
         User user = getAuthenticatedUser();
 
